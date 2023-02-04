@@ -7,7 +7,7 @@
 <p align="center">
   <img width="600"
        alt="Alacritty - A fast, cross-platform, OpenGL terminal emulator"
-       src="https://user-images.githubusercontent.com/8886672/103264352-5ab0d500-49a2-11eb-8961-02f7da66c855.png">
+       src="https://user-images.githubusercontent.com/4368882/216749676-cfdabd9d-f936-46c2-9a7b-38c81a6b11ba.png">
 </p>
 
 ## Features of this fork
