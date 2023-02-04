@@ -63,6 +63,9 @@ pub struct GlyphCache {
     /// Bold italic font.
     pub bold_italic_key: FontKey,
 
+    /// Fallback font.
+    pub fallback_key: FontKey,
+
     /// Font size.
     pub font_size: crossfont::Size,
 
@@ -81,7 +84,8 @@ pub struct GlyphCache {
 
 impl GlyphCache {
     pub fn new(mut rasterizer: Rasterizer, font: &Font) -> Result<GlyphCache, crossfont::Error> {
-        let (regular, bold, italic, bold_italic) = Self::compute_font_keys(font, &mut rasterizer)?;
+        let (regular, bold, italic, bold_italic, fallback) =
+            Self::compute_font_keys(font, &mut rasterizer)?;
 
         // Need to load at least one glyph for the face before calling metrics.
         // The glyph requested here ('m' at the time of writing) has no special
@@ -98,6 +102,7 @@ impl GlyphCache {
             bold_key: bold,
             italic_key: italic,
             bold_italic_key: bold_italic,
+            fallback_key: fallback,
             font_offset: font.offset,
             glyph_offset: font.glyph_offset,
             metrics,
@@ -118,7 +123,7 @@ impl GlyphCache {
     fn compute_font_keys(
         font: &Font,
         rasterizer: &mut Rasterizer,
-    ) -> Result<(FontKey, FontKey, FontKey, FontKey), crossfont::Error> {
+    ) -> Result<(FontKey, FontKey, FontKey, FontKey, FontKey), crossfont::Error> {
         let size = font.size();
 
         // Load regular font.
@@ -150,7 +155,12 @@ impl GlyphCache {
 
         let bold_italic = load_or_regular(bold_italic_desc);
 
-        Ok((regular, bold, italic, bold_italic))
+        // Load fallback font.
+        let fallback_desc = Self::make_desc(&font.fallback(), Slant::Normal, Weight::Normal);
+
+        let fallback = load_or_regular(fallback_desc);
+
+        Ok((regular, bold, italic, bold_italic, fallback))
     }
 
     fn load_regular_font(
@@ -202,6 +212,8 @@ impl GlyphCache {
             return *glyph;
         };
 
+        let fb_key = GlyphKey { font_key: self.fallback_key, ..glyph_key };
+
         // Rasterize the glyph using the built-in font for special characters or the user's font
         // for everything else.
         let rasterized = self
@@ -215,11 +227,12 @@ impl GlyphCache {
                 )
             })
             .flatten()
-            .map_or_else(|| self.rasterizer.get_glyph(glyph_key), Ok);
+            .map_or_else(|| self.rasterizer.get_glyph(glyph_key), Ok)
+            .ok()
+            .map_or_else(|| self.rasterizer.get_glyph(fb_key), Ok);
 
         let glyph = match rasterized {
             Ok(rasterized) => self.load_glyph(loader, rasterized),
-            // Load fallback glyph.
             Err(RasterizerError::MissingGlyph(rasterized)) if show_missing => {
                 // Use `\0` as "missing" glyph to cache it only once.
                 let missing_key = GlyphKey { character: '\0', ..glyph_key };
@@ -287,7 +300,7 @@ impl GlyphCache {
         self.glyph_offset = font.glyph_offset;
 
         // Recompute font keys.
-        let (regular, bold, italic, bold_italic) =
+        let (regular, bold, italic, bold_italic, fallback) =
             Self::compute_font_keys(font, &mut self.rasterizer)?;
 
         self.rasterizer.get_glyph(GlyphKey {
@@ -304,6 +317,7 @@ impl GlyphCache {
         self.bold_key = bold;
         self.italic_key = italic;
         self.bold_italic_key = bold_italic;
+        self.fallback_key = fallback;
         self.metrics = metrics;
         self.builtin_box_drawing = font.builtin_box_drawing;
 
