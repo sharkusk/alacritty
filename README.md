@@ -14,6 +14,8 @@
 
 This fork adds fallback font support natively to Alacritty.  This is useful for MacOS and Windows users who wish to use NerdFont symbols without having to use patched fonts. The "NerdFontsSymbolsOnly" font can be downloaded from https://github.com/ryanoasis/nerd-fonts/releases and used as the fallback font.
 
+There is also a 'symbol' branch that allows a symbol font to be supported, where configurable ranges are used to override glyphs from the normal font.  I.e. The symbol font is used before other fonts, but only for specific ranges, while the fallback font is used as a last resort.
+
 ## About
 
 Alacritty is a modern terminal emulator that comes with sensible defaults, but
