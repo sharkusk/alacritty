@@ -2,13 +2,21 @@
     <img width="200" alt="Alacritty Logo" src="https://raw.githubusercontent.com/alacritty/alacritty/master/extra/logo/compat/alacritty-term%2Bscanlines.png">
 </p>
 
-<h1 align="center">Alacritty - A fast, cross-platform, OpenGL terminal emulator</h1>
+<h1 align="center">Alacritty - A fast, cross-platform, OpenGL terminal emulator (w/ fallback font support)</h1>
 
 <p align="center">
   <img width="600"
        alt="Alacritty - A fast, cross-platform, OpenGL terminal emulator"
-       src="https://user-images.githubusercontent.com/8886672/103264352-5ab0d500-49a2-11eb-8961-02f7da66c855.png">
+       src="https://user-images.githubusercontent.com/4368882/216749676-cfdabd9d-f936-46c2-9a7b-38c81a6b11ba.png">
 </p>
+
+## Features of this fork
+
+This fork adds fallback font support natively to Alacritty.  This is useful for MacOS and Windows users who wish to use NerdFont symbols without having to use patched fonts. The "NerdFontsSymbolsOnly" font can be downloaded from https://github.com/ryanoasis/nerd-fonts/releases and used as the fallback font.
+
+It also supports a symbol font, where configurable ranges are used to override glyphs from the normal font.  I.e. The symbol font is used before other fonts, but only for specific ranges, while the fallback font is used as a last resort.
+
+Both these features are also available on the v0.11.1 release branch.
 
 ## About
 
